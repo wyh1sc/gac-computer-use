@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "面向 Windows 的 Computer Use（GUI 自动化）DSH 插件：自包含重实现 GAC 协议 v1 服务端 + MCP stdio 桥 + 实时 \"pip\" 隔离桌面预览，不随包分发任何第三方运行时。",
   "type": "module",
+  "author": "wyh1sc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wyh1sc/gac-computer-use.git"
+  },
   "main": "./lib/index.js",
   "exports": {
     ".": "./lib/index.js",
@@ -38,6 +43,7 @@
     "windows",
     "mcp",
     "dsh",
+    "dsh-plugin",
     "agent"
   ],
   "license": "MIT"
