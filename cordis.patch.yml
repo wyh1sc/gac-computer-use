@@ -1,0 +1,25 @@
+# GAC Computer Use — MCP stdio bridge registration for DSH.
+#
+# This file is a TEMPLATE. `scripts/setup.mjs` rewrites the `command` and `args`
+# below with the absolute machine paths it discovers, then DSH reloads the
+# profile and launches the MCP server.
+#
+# Marketplace rule: a published patch must never hardcode a specific user's
+# machine path. The installer writes them (same rule the windows-mcp-bridge
+# bundle follows — it writes an absolute path straight into this file).
+#
+# If DSH loads this template before setup runs, the placeholder command simply
+# fails to spawn; the row declares `failOnStartupError: false`, so the harness
+# stays up and the message tells the operator to run setup.
+- insert:
+    - id: gac-mcp-bridge
+      name: '@deepseek-ai/dsh-mcp-client'
+      disabled: false
+      config:
+        serverName: gac
+        transport: stdio
+        command: '{{PYTHON}}'
+        args: [ '{{PLUGIN_ROOT}}/python/gac_server/mcp_bridge.py' ]
+        toolCallTimeoutMs: 120000
+        failOnStartupError: false
+        reconnect: { enabled: true, initialDelayMs: 500, maxDelayMs: 30000, maxAttempts: 10 }

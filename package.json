@@ -1,0 +1,44 @@
+{
+  "name": "gac-computer-use",
+  "version": "1.0.0",
+  "description": "Computer Use (GUI automation) for Windows. A self-contained reimplementation of the GAC protocol v1 server plus an MCP stdio bridge and a live 'pip' desktop preview. No third-party runtime is redistributed.",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js"
+  },
+  "files": [
+    "lib",
+    "python",
+    "scripts",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  },
+  "keywords": [
+    "computer-use",
+    "gui-automation",
+    "windows",
+    "mcp",
+    "dsh",
+    "agent"
+  ],
+  "license": "MIT"
+}
