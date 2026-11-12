@@ -1,121 +1,95 @@
-# GAC Computer Use (DSH plugin)
+# GAC Computer Use（DSH 插件）
 
-Computer Use / GUI automation for Windows, packaged as a **DSH plugin** for the
-DSH plugin marketplace. It lets an agent drive the local machine — screenshot,
-move the pointer, click, type, read/write the clipboard, launch apps, switch
-desktops — through a set of Model Context Protocol (MCP) tools exposed to DSH.
+面向 Windows 的 Computer Use / GUI 自动化能力，打包成 **DSH 插件**，可上架到 DSH 插件市场。它让智能体通过一组暴露给 DSH 的 Model Context Protocol（MCP）工具来操控本地机器——截图、移动鼠标、点击、输入文本、读写剪贴板、启动应用、切换桌面等。
 
-This is a **self-contained reimplementation** of the GAC protocol v1 server and
-client. No third-party runtime is redistributed: the wire crypto is the public
-RFC 8439 ChaCha20-Poly1305, the protocol client is written from the wire
-spec, and the Win32 backend uses only `ctypes` plus the Python standard
-library. You do **not** need Doubao, `gac_runtime_extract`, or any pip package.
+这是 GAC 协议 v1 服务端与客户端的**自包含重实现**。不随包分发任何第三方运行时：传输层加密采用公开的 RFC 8439 ChaCha20-Poly1305，协议客户端依据线格式规范从零编写，Win32 后端仅依赖 `ctypes` 与 Python 标准库。你**不需要**豆包、`gac_runtime_extract`，也不需要安装任何 pip 包。
 
-## What it does
+## 它能做什么
 
-- **`gac-mcp-bridge`** — a single stdio MCP server (`python/gac_server/mcp_bridge.py`)
-  that boots its own GAC TCP server on a random loopback port and serves 18
-  computer-use tools to DSH via the `@deepseek-ai/dsh-mcp-client` host.
-- **`gac-pip-view`** — a sidebar tab + same-origin HTTP proxy that streams the
-  live picture of an **isolated "pip" virtual desktop**. Apps launched there
-  never touch your real screen, mouse, or keyboard.
+- **`gac-mcp-bridge`** —— 单个 stdio 模式的 MCP 服务（`python/gac_server/mcp_bridge.py`），在随机回环端口上启动自带的 GAC TCP 服务，并通过 `@deepseek-ai/dsh-mcp-client` 宿主向 DSH 提供 18 个 computer-use 工具。
+- **`gac-pip-view`** —— 侧边栏标签页 + 同源 HTTP 代理，实时展示一个**隔离的"pip"虚拟桌面**画面。在那里启动的应用永远不会触碰你真实的屏幕、鼠标或键盘。
 
-### Tools exposed (`serverName: gac`)
+### 暴露的工具（`serverName: gac`）
 
-| Tool | Purpose |
-|------|---------|
-| `gac_screenshot` | Capture the active plane (full screen on `main`, front window on `pip`). Returns a PNG. |
-| `gac_list_apps` | List launchable Windows applications. |
-| `gac_launch_app` | Launch an app by exact name. |
-| `gac_click` / `gac_double_click` / `gac_right_click` | Click at normalized 0–1000 coordinates. |
-| `gac_hover` | Move the pointer. |
-| `gac_drag` | Drag between two normalized points. |
-| `gac_scroll` | Scroll at a point. |
-| `gac_type` | Type Unicode text. |
-| `gac_hotkey` / `gac_press` | Key combination / single key. |
-| `gac_wait` | Wait for milliseconds. |
-| `gac_get_clipboard` / `gac_set_clipboard` | Clipboard read/write. |
-| `gac_copy_selection` | Ctrl+C then read the clipboard. |
-| `gac_switch_desktop` | Switch plane: `main` (real desktop) or `pip` (isolated). |
-| `gac_handoff` | **Pause and hand control to a human** for login / 2FA / captcha / payment, with a "Done" button in the sidebar. |
+| 工具 | 用途 |
+|------|------|
+| `gac_screenshot` | 截取当前平面（主桌面为全屏，pip 为最前窗口），返回 PNG。 |
+| `gac_list_apps` | 列出可启动的 Windows 应用。 |
+| `gac_launch_app` | 按精确名称启动应用。 |
+| `gac_click` / `gac_double_click` / `gac_right_click` | 在归一化 0–1000 坐标处点击。 |
+| `gac_hover` | 移动鼠标指针。 |
+| `gac_drag` | 在两个归一化坐标点之间拖拽。 |
+| `gac_scroll` | 在指定位置滚动。 |
+| `gac_type` | 输入 Unicode 文本。 |
+| `gac_hotkey` / `gac_press` | 组合键 / 单键。 |
+| `gac_wait` | 等待若干毫秒。 |
+| `gac_get_clipboard` / `gac_set_clipboard` | 读 / 写剪贴板。 |
+| `gac_copy_selection` | Ctrl+C 后读取剪贴板内容。 |
+| `gac_switch_desktop` | 切换平面：`main`（真实桌面）或 `pip`（隔离桌面）。 |
+| `gac_handoff` | **暂停并把控制权交给真人**，用于登录 / 二次验证 / 验证码 / 支付，侧边栏提供"完成"按钮。 |
 
-## Platform
+## 支持平台
 
-**Windows only.** The server drives Win32 APIs (`user32` / `gdi32` / `kernel32`)
-through `ctypes`. Requires **Python 3.10+** on the machine (standard library
-only — no `pip install` needed).
+**仅支持 Windows。** 服务端通过 `ctypes` 调用 Win32 API（`user32` / `gdi32` / `kernel32`）。本机需安装 **Python 3.10+**（仅标准库，无需 `pip install`）。
 
-## Install
+## 安装
 
-### From the marketplace
-Install `gac-computer-use` from the DSH plugin marketplace, then run the
-installer so the MCP command is bound to your Python:
+### 从插件市场安装
+在 DSH 插件市场安装 `gac-computer-use` 后，运行安装脚本，将 MCP 命令绑定到你的 Python：
 
 ```bash
-cd <installed plugin dir>
+cd <插件安装目录>
 node scripts/setup.mjs
 ```
 
-Then reload the DSH profile (or restart DSH).
+随后重载 DSH 配置（或重启 DSH）。
 
-### Manual / local development
+### 手动 / 本地开发
 ```bash
-git clone <repo> gac-computer-use
+git clone <仓库地址> gac-computer-use
 cd gac-computer-use
-node scripts/setup.mjs        # writes your Python path into cordis.patch.yml
-# symlink or copy this folder into your DSH plugins directory, then reload
+node scripts/setup.mjs        # 将你的 Python 路径写入 cordis.patch.yml
+# 将此文件夹软链或复制到你的 DSH 插件目录，然后重载
 ```
 
-`setup.mjs` finds Python 3.10+ (`py -3` on Windows first, then `python3` /
-`python`), resolves it to an absolute executable, warns if the OS is not
-Windows, and rewrites `cordis.patch.yml` in place. Re-running is safe.
+`setup.mjs` 会查找 Python 3.10+（Windows 上优先 `py -3`，其次 `python3` / `python`），解析为绝对可执行路径，在非 Windows 时给出警告，并就地重写 `cordis.patch.yml`。重复运行安全。
 
-## How it fits together
+## 整体架构
 
 ```
-DSH ──(stdio)──> mcp_bridge.py  ──(in-process TCP)──> GAC server (server.py)
+DSH ──(stdio)──> mcp_bridge.py  ──(进程内 TCP)──> GAC 服务端 (server.py)
                        │                                      │
-                       │ ComputerUse client (gac_client.py)    │ RFC 8439 AEAD
+                       │ ComputerUse 客户端 (gac_client.py)    │ RFC 8439 认证加密
                        │                                      │
-                  sidebar tab  <──HTTP /gac-pip/*──  pip_view.py (MJPEG + handoff)
+                  侧边栏标签  <──HTTP /gac-pip/*──  pip_view.py (MJPEG + 人工接管)
                        │                                      │
-                  lib/client.js  <──proxy──  lib/index.js  <── 127.0.0.1:52360
+                  lib/client.js  <──代理──  lib/index.js  <── 127.0.0.1:52360
 ```
 
-- **Protocol**: TCP, `GACF` 4-byte magic + u32 length frames. A token-challenge
-  HMAC-SHA256 handshake derives the session key via HKDF; every command is then
-  sealed with ChaCha20-Poly1305 (RFC 8439). See `gac_crypto.py` and `server.py`.
-- **Coordinates**: normalized to a 0–1000 space (the client scales to the real
-  screen / window). This matches the upstream computer-use convention.
-- **Pip desktop**: `gac_switch_desktop("pip")` moves subsequent work onto a
-  private `HDESK`; the sidebar shows it live and lets you take over for
-  sensitive steps via `gac_handoff`.
+- **协议**：TCP，4 字节 `GACF` 魔数 + u32 长度帧。基于 token 挑战的 HMAC-SHA256 握手通过 HKDF 派生会话密钥；随后每条命令均用 ChaCha20-Poly1305（RFC 8439）加密封装。详见 `gac_crypto.py` 与 `server.py`。
+- **坐标**：归一化到 0–1000 空间（客户端再缩放到真实屏幕 / 窗口），与上游 computer-use 约定一致。
+- **pip 桌面**：`gac_switch_desktop("pip")` 将后续操作转移到私有的 `HDESK` 桌面；侧边栏实时展示，并可通过 `gac_handoff` 在敏感步骤（登录 / 支付等）把控制权交给你。
 
-## Security model
+## 安全模型
 
-- The server binds **loopback only** (`127.0.0.1`); nothing is reachable from
-  the network.
-- The session is authenticated by a shared secret (`HKDF(token, secret)`); the
-  secret is generated per launch and passed to the client via environment
-  variables scoped to the bridge process.
-- `gac_handoff` exists precisely so the agent does **not** perform login / 2FA /
-  payment on your behalf — it blocks and hands the keyboard to you.
+- 服务端**仅绑定回环地址**（`127.0.0.1`），外部网络无法访问。
+- 会话通过共享密钥认证（`HKDF(token, secret)`）；密钥每次启动生成，经环境变量传给桥接进程（作用域限定在桥接进程内）。
+- `gac_handoff` 的存在正是为了让智能体**不**替你执行登录 / 二次验证 / 支付操作——它会暂停并把手键盘交还给你。
 
-## Development & tests
+## 开发与测试
 
-Self-contained end-to-end test (no external runtime), exercising all 19 command
-paths through the real client and server in one process:
+自包含端到端测试（无需任何外部运行时），在同一个进程内通过真实客户端与服务端走通全部 19 条命令路径：
 
 ```bash
 python python/gac_server/test_e2e.py
 ```
 
-To run the MCP bridge manually against a DSH-like stdio transport:
+若要针对类 DSH 的 stdio 传输手动运行 MCP 桥：
 
 ```bash
-python python/gac_server/mcp_bridge.py      # speaks JSON-RPC over stdin/stdout
+python python/gac_server/mcp_bridge.py      # 通过 stdin/stdout 讲 JSON-RPC
 ```
 
-## License
+## 许可证
 
-MIT — see [LICENSE](./LICENSE).
+MIT —— 见 [LICENSE](./LICENSE)。

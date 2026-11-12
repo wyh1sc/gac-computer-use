@@ -1,7 +1,7 @@
 {
   "name": "gac-computer-use",
   "version": "1.0.0",
-  "description": "Computer Use (GUI automation) for Windows. A self-contained reimplementation of the GAC protocol v1 server plus an MCP stdio bridge and a live 'pip' desktop preview. No third-party runtime is redistributed.",
+  "description": "面向 Windows 的 Computer Use（GUI 自动化）DSH 插件：自包含重实现 GAC 协议 v1 服务端 + MCP stdio 桥 + 实时 \"pip\" 隔离桌面预览，不随包分发任何第三方运行时。",
   "type": "module",
   "main": "./lib/index.js",
   "exports": {
